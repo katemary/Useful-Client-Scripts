@@ -1,0 +1,53 @@
+function onLoad() {
+   var fields = ['change_request.start_date','change_request.end_date','change_request.work_start', 'change_request.work_end'];
+   try {
+      //jQuery('a[data-type="date_time"]') this worked in Fuji...
+      jQuery('input[data-type="glide_element_date_time"]')
+         .each(function (index, value) {
+            var ref = jQuery(this).attr('data-ref');
+            if (ref.length) {
+               jslog('JM: found element at index: ' + index + ' value: ' + ref);
+               var val = g_form.getValue(ref);
+               if (val == '' && fields.indexOf(ref) > -1) {
+                  jslog('JM: registering event for element at index: ' + index + ' value: ' + ref);
+                  //need to call .next() in Geneva/Helsinki, not needed in prior versions, to get the calendar button beside the ref field
+                  jQuery(this).next().on('click', function () {
+                     setTimeout(controlDateTimeSelector, 500);
+                  });
+               }
+            }
+         });
+ 
+   } catch (e){
+      console.error('JM: Error occurred: ' + e.toString() + ' on line:' + e.lineNumber);
+   }
+ 
+   function controlDateTimeSelector(iterator) {
+      jslog('JM: Starting controlDateTimeSelector.');
+      var prefixId = '#GwtDateTimePicker';
+      try {
+         if (iterator === undefined) {
+            iterator = 0;
+ 
+         } else if (iterator > 5) {
+            jslog('JM: Stopping; hit max iteration count.');
+            return
+         }
+ 
+         if (!jQuery(prefixId + '_header').length) {
+            jslog("JM: Didn't find DatePicker, trying again in 500ms. Iterator was: " + iterator);
+            iterator++;
+            setTimeout(controlDateTimeSelector.bind(null, iterator), 500);
+ 
+         } else {
+            jslog('JM: Found and Set DatePicker.');
+            jQuery(prefixId + '_hh').val('--');
+            jQuery(prefixId + '_mm').val('--');
+            jQuery(prefixId + '_ss').val('--');
+         }
+      } catch (e){
+            console.error('JM: Error occurred: ' + e.toString() + ' on line:' + e.lineNumber);
+      }
+   }
+}
+}
